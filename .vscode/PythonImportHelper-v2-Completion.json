@@ -1,0 +1,263 @@
+[
+    {
+        "label": "FastAPI",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Header",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTMLResponse",
+        "importPath": "fastapi.responses",
+        "description": "fastapi.responses",
+        "isExtraImport": true,
+        "detail": "fastapi.responses",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "Groq",
+        "importPath": "groq",
+        "description": "groq",
+        "isExtraImport": true,
+        "detail": "groq",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "uuid",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "uuid",
+        "description": "uuid",
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "psycopg2",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "psycopg2",
+        "description": "psycopg2",
+        "detail": "psycopg2",
+        "documentation": {}
+    },
+    {
+        "label": "Json",
+        "importPath": "psycopg2.extras",
+        "description": "psycopg2.extras",
+        "isExtraImport": true,
+        "detail": "psycopg2.extras",
+        "documentation": {}
+    },
+    {
+        "label": "RealDictCursor",
+        "importPath": "psycopg2.extras",
+        "description": "psycopg2.extras",
+        "isExtraImport": true,
+        "detail": "psycopg2.extras",
+        "documentation": {}
+    },
+    {
+        "label": "ChatRequest",
+        "kind": 6,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "class ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(\n        host=os.getenv(\"POSTGRES_HOST\", \"localhost\"),\n        port=os.getenv(\"POSTGRES_PORT\", \"5432\"),\n        database=os.getenv(\"POSTGRES_DB\", \"ai_ordering\"),\n        user=os.getenv(\"POSTGRES_USER\", \"postgres\"),\n        password=os.getenv(\"POSTGRES_PASSWORD\"),",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "get_db_connection",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def get_db_connection():\n    return psycopg2.connect(\n        host=os.getenv(\"POSTGRES_HOST\", \"localhost\"),\n        port=os.getenv(\"POSTGRES_PORT\", \"5432\"),\n        database=os.getenv(\"POSTGRES_DB\", \"ai_ordering\"),\n        user=os.getenv(\"POSTGRES_USER\", \"postgres\"),\n        password=os.getenv(\"POSTGRES_PASSWORD\"),\n        cursor_factory=RealDictCursor\n    )\n# --- Conversation DB helpers ---",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "get_system_message",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def get_system_message():\n    return {\n        \"role\": \"system\",\n        \"content\": \"\"\"\n        You are an AI telecom ordering assistant.\n        Help customers:\n        - search telecom plans\n        - compare pricing\n        - calculate quotes\n        Use tools whenever needed.",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "ensure_conversation",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def ensure_conversation(session_id: str):\n    query = \"\"\"\n        INSERT INTO conversations (session_id)\n        VALUES (%s)\n        ON CONFLICT (session_id) DO NOTHING;\n    \"\"\"\n    with get_db_connection() as conn:\n        with conn.cursor() as cursor:\n            cursor.execute(query, (session_id,))\n            conn.commit()",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "save_message",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def save_message(session_id: str, role: str, content: str | None, tool_call_id: str | None = None, tool_calls=None):\n    query = \"\"\"\n        INSERT INTO conversation_messages (session_id, role, content, tool_call_id, tool_calls)\n        VALUES (%s, %s, %s, %s, %s);\n    \"\"\"\n    with get_db_connection() as conn:\n        with conn.cursor() as cursor:\n            cursor.execute(\n                query,\n                (",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "load_messages",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def load_messages(session_id: str):\n    query = \"\"\"\n        SELECT role, content, tool_call_id, tool_calls\n        FROM conversation_messages\n        WHERE session_id = %s\n        ORDER BY id ASC;\n    \"\"\"\n    with get_db_connection() as conn:\n        with conn.cursor() as cursor:\n            cursor.execute(query, (session_id,))",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "serialize_tool_calls",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def serialize_tool_calls(tool_calls):\n    if not tool_calls:\n        return None\n    return [\n        {\n            \"id\": tool_call.id,\n            \"type\": tool_call.type,\n            \"function\": {\n                \"name\": tool_call.function.name,\n                \"arguments\": tool_call.function.arguments",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "search_offers",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def search_offers(max_price: int | None = None, lob: str | None = None):\n    query = \"\"\"\n        SELECT id, name, price, lob, speed\n        FROM offers\n        WHERE (%s IS NULL OR price <= %s)\n        AND (%s IS NULL OR lob = %s)\n        ORDER BY price ASC;\n    \"\"\"\n    with get_db_connection() as conn:\n        with conn.cursor() as cursor:",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "calculate_quote",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def calculate_quote(offer_ids: list[int]):\n    if not offer_ids:\n        return {\n            \"selected_offers\": [],\n            \"monthly_total\": 0\n        }\n    query = \"\"\"\n        SELECT id, name, price, lob, speed\n        FROM offers\n        WHERE id = ANY(%s)",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "root",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def root():\n    return {\n        \"message\": \"AI Ordering Agent Running\"\n    }\n# Simple HTML UI endpoint\n@app.get(\"/ui\", response_class=HTMLResponse)\ndef ui():\n    return \"\"\"\n    <!DOCTYPE html>\n    <html lang=\"en\">",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "ui",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def ui():\n    return \"\"\"\n    <!DOCTYPE html>\n    <html lang=\"en\">\n    <head>\n        <meta charset=\"UTF-8\" />\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n        <title>AI Ordering Agent</title>\n        <style>\n            body {",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "chat",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def chat(\n    request: ChatRequest,\n    x_session_id: str | None = Header(default=None, alias=\"X-Session-Id\")\n):\n    session_id = x_session_id or str(uuid.uuid4())\n    ensure_conversation(session_id)\n    save_message(\n        session_id=session_id,\n        role=\"user\",\n        content=request.message",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "env_path",
+        "kind": 5,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "env_path = Path(__file__).parent / \".env\"\nload_dotenv(dotenv_path=env_path)\n# Create FastAPI app\napp = FastAPI()\n# Create Groq client\nclient = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nclass ChatRequest(BaseModel):\n    message: str",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "app = FastAPI()\n# Create Groq client\nclient = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nclass ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "client",
+        "kind": 5,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "client = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nclass ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(\n        host=os.getenv(\"POSTGRES_HOST\", \"localhost\"),\n        port=os.getenv(\"POSTGRES_PORT\", \"5432\"),",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "tools",
+        "kind": 5,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "tools = [\n    {\n        \"type\": \"function\",\n        \"function\": {\n            \"name\": \"search_offers\",\n            \"description\": \"Search available telecom offers by max price and line of business.\",\n            \"parameters\": {\n                \"type\": \"object\",\n                \"properties\": {\n                    \"max_price\": {",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "available_tools",
+        "kind": 5,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "available_tools = {\n    \"search_offers\": search_offers,\n    \"calculate_quote\": calculate_quote\n}\n# Health endpoint\n@app.get(\"/\")\ndef root():\n    return {\n        \"message\": \"AI Ordering Agent Running\"\n    }",
+        "detail": "backend.main",
+        "documentation": {}
+    }
+]
