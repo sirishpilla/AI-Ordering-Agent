@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Header
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from groq import Groq
+from groq import Groq, BadRequestError
 from pathlib import Path
 from dotenv import load_dotenv
 import os
@@ -60,11 +60,19 @@ IMPORTANT RULES:
 
 - Use tools ONLY when necessary.
 
+- Use tools only through the official tool_call mechanism.
+
+- Never write function calls as text.
+
+- Never write XML-style calls like <function=...>.
+
 - Never assume customer selections.
 
 - Never guess offer IDs.
 
 - If user intent is unclear, ask clarifying questions.
+
+- If the user gives only a number like "20", ask what type of plan they want unless it is already clear from context.
 
 - Do not proactively calculate quotes unless customer explicitly asks.
 
@@ -443,6 +451,11 @@ def ui():
                         body: JSON.stringify({ message })
                     });
 
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || "Request failed");
+                    }
+
                     const data = await response.json();
 
                     if (data.session_id) {
@@ -499,12 +512,32 @@ def chat(
 
     # FIRST AI CALL
     # AI decides whether tools are needed
-    first_response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=messages,
-        tools=tools,
-        tool_choice="auto"
-    )
+    try:
+        first_response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+            tools=tools,
+            tool_choice="auto"
+        )
+    except BadRequestError as e:
+        fallback_response = (
+            "I had trouble deciding which tool to use. "
+            "Can you clarify if you want internet, mobile, or bundle plans, "
+            "and your max monthly budget?"
+        )
+
+        print("GROQ TOOL CALL ERROR:", e)
+
+        save_message(
+            session_id=session_id,
+            role="assistant",
+            content=fallback_response
+        )
+
+        return {
+            "session_id": session_id,
+            "response": fallback_response
+        }
 
     assistant_message = first_response.choices[0].message
 

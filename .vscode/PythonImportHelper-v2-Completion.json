@@ -40,6 +40,14 @@
         "documentation": {}
     },
     {
+        "label": "BadRequestError",
+        "importPath": "groq",
+        "description": "groq",
+        "isExtraImport": true,
+        "detail": "groq",
+        "documentation": {}
+    },
+    {
         "label": "Path",
         "importPath": "pathlib",
         "description": "pathlib",
@@ -130,7 +138,7 @@
         "kind": 2,
         "importPath": "backend.main",
         "description": "backend.main",
-        "peekOfCode": "def get_system_message():\n    return {\n        \"role\": \"system\",\n        \"content\": \"\"\"\n        You are an AI telecom ordering assistant.\n        Help customers:\n        - search telecom plans\n        - compare pricing\n        - calculate quotes\n        Use tools whenever needed.",
+        "peekOfCode": "def get_system_message():\n    return {\n        \"role\": \"system\",\n        \"content\": \"\"\"\nYou are an AI telecom ordering assistant.\nHelp customers:\n- search telecom plans\n- compare pricing\n- calculate quotes\nIMPORTANT RULES:",
         "detail": "backend.main",
         "documentation": {}
     },
