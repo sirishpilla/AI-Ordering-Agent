@@ -7,9 +7,12 @@ from dotenv import load_dotenv
 import os
 import json
 import uuid
+from decimal import Decimal
 import psycopg2
 from psycopg2.extras import Json
 from psycopg2.extras import RealDictCursor
+from pgvector.psycopg2 import register_vector
+from sentence_transformers import SentenceTransformer
 
 # Load .env file
 env_path = Path(__file__).parent / ".env"
@@ -22,6 +25,15 @@ app = FastAPI()
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
+
+EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+_embedding_model = None
+
+def get_embedding_model():
+    global _embedding_model
+    if _embedding_model is None:
+        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+    return _embedding_model
 
 class ChatRequest(BaseModel):
     message: str
@@ -56,9 +68,13 @@ Help customers:
 
 - calculate quotes
 
+- answer company policy, billing, installation, equipment return, moving service, and FAQ questions using search_knowledge
+
 IMPORTANT RULES:
 
 - Use tools ONLY when necessary.
+
+- Use search_knowledge for questions about company documentation, policies, FAQs, installation fees, billing rules, equipment returns, moving service, and general knowledge from documents.
 
 - Use tools only through the official tool_call mechanism.
 
@@ -175,6 +191,19 @@ def serialize_tool_calls(tool_calls):
         for tool_call in tool_calls
     ]
 
+
+def json_safe(value):
+    if isinstance(value, Decimal):
+        return float(value)
+
+    if isinstance(value, list):
+        return [json_safe(item) for item in value]
+
+    if isinstance(value, dict):
+        return {key: json_safe(item) for key, item in value.items()}
+
+    return value
+
 # Tool 1
 def search_offers(max_price: int | None = None, lob: str | None = None):
     query = """
@@ -216,6 +245,37 @@ def calculate_quote(offer_ids: list[int]):
         "selected_offers": selected,
         "monthly_total": total
     }
+
+ 
+# Tool 3
+# Search company knowledge documents using RAG
+
+def search_knowledge(query: str):
+    limit = 3
+    model = get_embedding_model()
+    query_embedding = model.encode(query).tolist()
+
+    with get_db_connection() as conn:
+        register_vector(conn)
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT source_file, content
+                FROM knowledge_chunks
+                ORDER BY embedding <-> %s::vector
+                LIMIT %s;
+                """,
+                (query_embedding, limit)
+            )
+            rows = cursor.fetchall()
+
+    return [
+        {
+            "source_file": row["source_file"],
+            "content": row["content"]
+        }
+        for row in rows
+    ]
 
 # AI Tool Definitions
 tools = [
@@ -262,13 +322,32 @@ tools = [
                 "required": ["offer_ids"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_knowledge",
+            "description": "Use this tool for ANY question about company documents, installation cost, setup fee, installation policy, billing rules, equipment returns, moving service, mobile policy, FAQs, or general company knowledge. This searches the RAG knowledge base. Do not answer these questions from memory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The user's question rewritten as a short search query. Example: installation cost or setup fee."
+                    }
+                },
+                "required": ["query"],
+                "additionalProperties": False
+            }
+        }
     }
 ]
 
 # Map AI tool names to Python functions
 available_tools = {
     "search_offers": search_offers,
-    "calculate_quote": calculate_quote
+    "calculate_quote": calculate_quote,
+    "search_knowledge": search_knowledge
 }
 
 # Health endpoint
@@ -521,9 +600,8 @@ def chat(
         )
     except BadRequestError as e:
         fallback_response = (
-            "I had trouble deciding which tool to use. "
-            "Can you clarify if you want internet, mobile, or bundle plans, "
-            "and your max monthly budget?"
+            "I had trouble using the right tool for that request. "
+            "Please try asking it a little more directly, like: 'What is the installation fee?'"
         )
 
         print("GROQ TOOL CALL ERROR:", e)
@@ -592,7 +670,7 @@ def chat(
 
         print("TOOL RESULT:", tool_result)
 
-        tool_result_json = json.dumps(tool_result)
+        tool_result_json = json.dumps(json_safe(tool_result))
 
         save_message(
             session_id=session_id,

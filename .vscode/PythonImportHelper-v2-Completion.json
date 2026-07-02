@@ -1,5 +1,87 @@
 [
     {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "psycopg2",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "psycopg2",
+        "description": "psycopg2",
+        "detail": "psycopg2",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "register_vector",
+        "importPath": "pgvector.psycopg2",
+        "description": "pgvector.psycopg2",
+        "isExtraImport": true,
+        "detail": "pgvector.psycopg2",
+        "documentation": {}
+    },
+    {
+        "label": "register_vector",
+        "importPath": "pgvector.psycopg2",
+        "description": "pgvector.psycopg2",
+        "isExtraImport": true,
+        "detail": "pgvector.psycopg2",
+        "documentation": {}
+    },
+    {
+        "label": "SentenceTransformer",
+        "importPath": "sentence_transformers",
+        "description": "sentence_transformers",
+        "isExtraImport": true,
+        "detail": "sentence_transformers",
+        "documentation": {}
+    },
+    {
+        "label": "SentenceTransformer",
+        "importPath": "sentence_transformers",
+        "description": "sentence_transformers",
+        "isExtraImport": true,
+        "detail": "sentence_transformers",
+        "documentation": {}
+    },
+    {
         "label": "FastAPI",
         "importPath": "fastapi",
         "description": "fastapi",
@@ -48,31 +130,6 @@
         "documentation": {}
     },
     {
-        "label": "Path",
-        "importPath": "pathlib",
-        "description": "pathlib",
-        "isExtraImport": true,
-        "detail": "pathlib",
-        "documentation": {}
-    },
-    {
-        "label": "load_dotenv",
-        "importPath": "dotenv",
-        "description": "dotenv",
-        "isExtraImport": true,
-        "detail": "dotenv",
-        "documentation": {}
-    },
-    {
-        "label": "os",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "os",
-        "description": "os",
-        "detail": "os",
-        "documentation": {}
-    },
-    {
         "label": "json",
         "kind": 6,
         "isExtraImport": true,
@@ -91,12 +148,11 @@
         "documentation": {}
     },
     {
-        "label": "psycopg2",
-        "kind": 6,
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
         "isExtraImport": true,
-        "importPath": "psycopg2",
-        "description": "psycopg2",
-        "detail": "psycopg2",
+        "detail": "decimal",
         "documentation": {}
     },
     {
@@ -116,11 +172,74 @@
         "documentation": {}
     },
     {
+        "label": "get_db_connection",
+        "kind": 2,
+        "importPath": "backend.ingest_docs",
+        "description": "backend.ingest_docs",
+        "peekOfCode": "def get_db_connection():\n    return psycopg2.connect(\n        host=os.getenv(\"POSTGRES_HOST\", \"localhost\"),\n        port=os.getenv(\"POSTGRES_PORT\", \"5432\"),\n        database=os.getenv(\"POSTGRES_DB\", \"ai_ordering\"),\n        user=os.getenv(\"POSTGRES_USER\", \"postgres\"),\n        password=os.getenv(\"POSTGRES_PASSWORD\")\n    )\ndef chunk_text(text: str, chunk_size: int = 300):\n    text = \" \".join(text.split())",
+        "detail": "backend.ingest_docs",
+        "documentation": {}
+    },
+    {
+        "label": "chunk_text",
+        "kind": 2,
+        "importPath": "backend.ingest_docs",
+        "description": "backend.ingest_docs",
+        "peekOfCode": "def chunk_text(text: str, chunk_size: int = 300):\n    text = \" \".join(text.split())\n    return [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]\ndef ensure_table():\n    with get_db_connection() as conn:\n        with conn.cursor() as cursor:\n            cursor.execute(\"CREATE EXTENSION IF NOT EXISTS vector;\")\n            cursor.execute(\n                \"\"\"\n                CREATE TABLE IF NOT EXISTS knowledge_chunks (",
+        "detail": "backend.ingest_docs",
+        "documentation": {}
+    },
+    {
+        "label": "ensure_table",
+        "kind": 2,
+        "importPath": "backend.ingest_docs",
+        "description": "backend.ingest_docs",
+        "peekOfCode": "def ensure_table():\n    with get_db_connection() as conn:\n        with conn.cursor() as cursor:\n            cursor.execute(\"CREATE EXTENSION IF NOT EXISTS vector;\")\n            cursor.execute(\n                \"\"\"\n                CREATE TABLE IF NOT EXISTS knowledge_chunks (\n                    id SERIAL PRIMARY KEY,\n                    source_file TEXT NOT NULL,\n                    chunk_index INTEGER NOT NULL,",
+        "detail": "backend.ingest_docs",
+        "documentation": {}
+    },
+    {
+        "label": "ingest_docs",
+        "kind": 2,
+        "importPath": "backend.ingest_docs",
+        "description": "backend.ingest_docs",
+        "peekOfCode": "def ingest_docs():\n    if not DOCS_DIR.exists():\n        print(f\"Docs folder not found: {DOCS_DIR}\")\n        return\n    files = list(DOCS_DIR.glob(\"*.txt\"))\n    if not files:\n        print(\"No .txt files found.\")\n        return\n    print(f\"Loading embedding model: {MODEL_NAME}\")\n    model = SentenceTransformer(MODEL_NAME)",
+        "detail": "backend.ingest_docs",
+        "documentation": {}
+    },
+    {
+        "label": "DOCS_DIR",
+        "kind": 5,
+        "importPath": "backend.ingest_docs",
+        "description": "backend.ingest_docs",
+        "peekOfCode": "DOCS_DIR = Path(__file__).parent / \"docs\"\nMODEL_NAME = \"all-MiniLM-L6-v2\"\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(\n        host=os.getenv(\"POSTGRES_HOST\", \"localhost\"),\n        port=os.getenv(\"POSTGRES_PORT\", \"5432\"),\n        database=os.getenv(\"POSTGRES_DB\", \"ai_ordering\"),\n        user=os.getenv(\"POSTGRES_USER\", \"postgres\"),\n        password=os.getenv(\"POSTGRES_PASSWORD\")",
+        "detail": "backend.ingest_docs",
+        "documentation": {}
+    },
+    {
+        "label": "MODEL_NAME",
+        "kind": 5,
+        "importPath": "backend.ingest_docs",
+        "description": "backend.ingest_docs",
+        "peekOfCode": "MODEL_NAME = \"all-MiniLM-L6-v2\"\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(\n        host=os.getenv(\"POSTGRES_HOST\", \"localhost\"),\n        port=os.getenv(\"POSTGRES_PORT\", \"5432\"),\n        database=os.getenv(\"POSTGRES_DB\", \"ai_ordering\"),\n        user=os.getenv(\"POSTGRES_USER\", \"postgres\"),\n        password=os.getenv(\"POSTGRES_PASSWORD\")\n    )",
+        "detail": "backend.ingest_docs",
+        "documentation": {}
+    },
+    {
         "label": "ChatRequest",
         "kind": 6,
         "importPath": "backend.main",
         "description": "backend.main",
         "peekOfCode": "class ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(\n        host=os.getenv(\"POSTGRES_HOST\", \"localhost\"),\n        port=os.getenv(\"POSTGRES_PORT\", \"5432\"),\n        database=os.getenv(\"POSTGRES_DB\", \"ai_ordering\"),\n        user=os.getenv(\"POSTGRES_USER\", \"postgres\"),\n        password=os.getenv(\"POSTGRES_PASSWORD\"),",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "get_embedding_model",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def get_embedding_model():\n    global _embedding_model\n    if _embedding_model is None:\n        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)\n    return _embedding_model\nclass ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(",
         "detail": "backend.main",
         "documentation": {}
     },
@@ -138,7 +257,7 @@
         "kind": 2,
         "importPath": "backend.main",
         "description": "backend.main",
-        "peekOfCode": "def get_system_message():\n    return {\n        \"role\": \"system\",\n        \"content\": \"\"\"\nYou are an AI telecom ordering assistant.\nHelp customers:\n- search telecom plans\n- compare pricing\n- calculate quotes\nIMPORTANT RULES:",
+        "peekOfCode": "def get_system_message():\n    return {\n        \"role\": \"system\",\n        \"content\": \"\"\"\nYou are an AI telecom ordering assistant.\nHelp customers:\n- search telecom plans\n- compare pricing\n- calculate quotes\n- answer company policy, billing, installation, equipment return, moving service, and FAQ questions using search_knowledge",
         "detail": "backend.main",
         "documentation": {}
     },
@@ -179,6 +298,15 @@
         "documentation": {}
     },
     {
+        "label": "json_safe",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def json_safe(value):\n    if isinstance(value, Decimal):\n        return float(value)\n    if isinstance(value, list):\n        return [json_safe(item) for item in value]\n    if isinstance(value, dict):\n        return {key: json_safe(item) for key, item in value.items()}\n    return value\n# Tool 1\ndef search_offers(max_price: int | None = None, lob: str | None = None):",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
         "label": "search_offers",
         "kind": 2,
         "importPath": "backend.main",
@@ -193,6 +321,15 @@
         "importPath": "backend.main",
         "description": "backend.main",
         "peekOfCode": "def calculate_quote(offer_ids: list[int]):\n    if not offer_ids:\n        return {\n            \"selected_offers\": [],\n            \"monthly_total\": 0\n        }\n    query = \"\"\"\n        SELECT id, name, price, lob, speed\n        FROM offers\n        WHERE id = ANY(%s)",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "search_knowledge",
+        "kind": 2,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "def search_knowledge(query: str):\n    limit = 3\n    model = get_embedding_model()\n    query_embedding = model.encode(query).tolist()\n    with get_db_connection() as conn:\n        register_vector(conn)\n        with conn.cursor() as cursor:\n            cursor.execute(\n                \"\"\"\n                SELECT source_file, content",
         "detail": "backend.main",
         "documentation": {}
     },
@@ -228,7 +365,7 @@
         "kind": 5,
         "importPath": "backend.main",
         "description": "backend.main",
-        "peekOfCode": "env_path = Path(__file__).parent / \".env\"\nload_dotenv(dotenv_path=env_path)\n# Create FastAPI app\napp = FastAPI()\n# Create Groq client\nclient = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nclass ChatRequest(BaseModel):\n    message: str",
+        "peekOfCode": "env_path = Path(__file__).parent / \".env\"\nload_dotenv(dotenv_path=env_path)\n# Create FastAPI app\napp = FastAPI()\n# Create Groq client\nclient = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nEMBEDDING_MODEL_NAME = \"all-MiniLM-L6-v2\"\n_embedding_model = None",
         "detail": "backend.main",
         "documentation": {}
     },
@@ -237,7 +374,7 @@
         "kind": 5,
         "importPath": "backend.main",
         "description": "backend.main",
-        "peekOfCode": "app = FastAPI()\n# Create Groq client\nclient = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nclass ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(",
+        "peekOfCode": "app = FastAPI()\n# Create Groq client\nclient = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nEMBEDDING_MODEL_NAME = \"all-MiniLM-L6-v2\"\n_embedding_model = None\ndef get_embedding_model():\n    global _embedding_model\n    if _embedding_model is None:",
         "detail": "backend.main",
         "documentation": {}
     },
@@ -246,7 +383,25 @@
         "kind": 5,
         "importPath": "backend.main",
         "description": "backend.main",
-        "peekOfCode": "client = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nclass ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper\ndef get_db_connection():\n    return psycopg2.connect(\n        host=os.getenv(\"POSTGRES_HOST\", \"localhost\"),\n        port=os.getenv(\"POSTGRES_PORT\", \"5432\"),",
+        "peekOfCode": "client = Groq(\n    api_key=os.getenv(\"GROQ_API_KEY\")\n)\nEMBEDDING_MODEL_NAME = \"all-MiniLM-L6-v2\"\n_embedding_model = None\ndef get_embedding_model():\n    global _embedding_model\n    if _embedding_model is None:\n        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)\n    return _embedding_model",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDING_MODEL_NAME",
+        "kind": 5,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "EMBEDDING_MODEL_NAME = \"all-MiniLM-L6-v2\"\n_embedding_model = None\ndef get_embedding_model():\n    global _embedding_model\n    if _embedding_model is None:\n        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)\n    return _embedding_model\nclass ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper",
+        "detail": "backend.main",
+        "documentation": {}
+    },
+    {
+        "label": "_embedding_model",
+        "kind": 5,
+        "importPath": "backend.main",
+        "description": "backend.main",
+        "peekOfCode": "_embedding_model = None\ndef get_embedding_model():\n    global _embedding_model\n    if _embedding_model is None:\n        _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)\n    return _embedding_model\nclass ChatRequest(BaseModel):\n    message: str\n# PostgreSQL connection helper\ndef get_db_connection():",
         "detail": "backend.main",
         "documentation": {}
     },
@@ -264,7 +419,7 @@
         "kind": 5,
         "importPath": "backend.main",
         "description": "backend.main",
-        "peekOfCode": "available_tools = {\n    \"search_offers\": search_offers,\n    \"calculate_quote\": calculate_quote\n}\n# Health endpoint\n@app.get(\"/\")\ndef root():\n    return {\n        \"message\": \"AI Ordering Agent Running\"\n    }",
+        "peekOfCode": "available_tools = {\n    \"search_offers\": search_offers,\n    \"calculate_quote\": calculate_quote,\n    \"search_knowledge\": search_knowledge\n}\n# Health endpoint\n@app.get(\"/\")\ndef root():\n    return {\n        \"message\": \"AI Ordering Agent Running\"",
         "detail": "backend.main",
         "documentation": {}
     }
